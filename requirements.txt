@@ -4,6 +4,7 @@ certifi==2021.10.8
 charset-normalizer==2.0.10
 colorama==0.4.4
 Django==4.0.1
+django-heroku==0.3.1
 fs==2.4.14
 idna==3.3
 Jinja2==2.11.3
