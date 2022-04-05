@@ -1,2 +1,1 @@
-heroku config:set WSGI_PATH=localLibrary/localLibrary/wsgi.py
-web: gunicorn $WSGI_PATH:application
+web: sh -c 'cd ./localLibrary/ && gunicorn localLibrary.wsgi'
