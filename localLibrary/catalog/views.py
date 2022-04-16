@@ -1,5 +1,5 @@
 import datetime
-from multiprocessing import context
+from uuid import uuid4
 
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
@@ -9,15 +9,30 @@ from django.contrib.auth.mixins import LoginRequiredMixin,PermissionRequiredMixi
 from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView,UpdateView,DeleteView
 
-from catalog.forms import RenewBookForm
+from catalog.forms import RenewBookForm,CreateBookInstanceForm
 
 from django.contrib.auth.decorators import login_required,permission_required
 
+
+class BookInstanceUpdate(PermissionRequiredMixin,UpdateView):
+    model = BookInstance
+    fields = ['imprint','status','borrower','due_back']
+    permission_required = 'catalog.can_mark_returned'
+    template_name_suffix= '_update'
+    def get_success_url(self):
+        return reverse('bookinstances')
+
+class BookInstanceDelete(PermissionRequiredMixin,DeleteView):
+    model = BookInstance    
+    permission_required = 'catalog.can_mark_returned'    
+    def get_success_url(self):
+        return reverse('bookinstances')
 
 class AuthorCreate(CreateView):
     model=Author
     fields = ['first_name','last_name','date_of_birth','date_of_death']
     initial = {'date_of_death':'11/06/2020'}
+
 class AuthorUpdate(UpdateView):
     model = Author
     fields = '__all__' # Not recommended (potential security issue if more fields added)
@@ -26,6 +41,37 @@ class AuthorDelete(DeleteView):
     model=Author
     success_url = reverse_lazy('authors')
 
+class BookInstanceList(PermissionRequiredMixin,generic.ListView):
+    model = BookInstance
+    permission_required = 'catalog.can_mark_returned'
+
+
+@login_required
+@permission_required('catalog.can_mark_returned')
+def create_bookinstance(request):    
+  
+    if request.method == 'POST':
+        form = CreateBookInstanceForm(request.POST)
+        if form.is_valid():
+            
+            cdata = form.cleaned_data
+            newBookInstance = BookInstance(
+                book=cdata['book'],
+                imprint =cdata['imprint'],
+                due_back = cdata['due_back'],
+                borrower = cdata['borrower'],
+                status = cdata['status'],
+            )
+            newBookInstance.save()
+            next_url = 'bookinstances' if  request.POST.get('action') == 'Submit' else 'create_bookinstance'
+            return HttpResponseRedirect(reverse(next_url))
+    else:
+        id = uuid4()
+        form = CreateBookInstanceForm(initial={'id':id})
+    context={
+        'form':form,
+    }
+    return render(request,'catalog/bookinstance_form.html',context)
 
 @login_required
 @permission_required('catalog.can_mark_returned',raise_exception=True)
@@ -83,13 +129,14 @@ def index(request : HttpRequest):
     
 class AuthorList(generic.ListView):
     model = Author
+    paginate_by = 10
 
 class AuthorDetail(generic.DetailView):
     model = Author
 
 class BookListView(generic.ListView):
     model = Book
-    paginate_by = 2
+    paginate_by = 10
     
 class BookDetailView(generic.DetailView):
     model = Book

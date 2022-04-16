@@ -1,3 +1,5 @@
+Procfile.windows
+
 # Django #
 *.log
 *.pot

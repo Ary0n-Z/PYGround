@@ -59,11 +59,12 @@ class BookInstance(models.Model):
     def __str__(self):
         return f'{self.id} ({self.book.title})'
     
+    
 
 class Author(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
-    date_of_birth = models.DateField(null=True,blank=True)
+    date_of_birth = models.DateField(verbose_name='Birth',null=True,blank=True)
     date_of_death = models.DateField(verbose_name='Died',null=True,blank=True)
 
     class Meta:

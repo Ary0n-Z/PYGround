@@ -3,6 +3,12 @@ import datetime
 
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
+from catalog.models import BookInstance
+
+class CreateBookInstanceForm(forms.ModelForm):
+    class Meta:
+        model  = BookInstance
+        fields = ['id','book','imprint','status','borrower','due_back']
 
 class RenewBookForm(forms.Form):
     renewal_date = forms.DateField(help_text='Enter a data between now and 4 weeks (default 3).')

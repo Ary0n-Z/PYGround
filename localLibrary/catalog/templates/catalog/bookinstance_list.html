@@ -1,0 +1,32 @@
+{% extends 'base_generic.html' %}
+
+{% block content %}
+    <h1>Book Instance List</h1>
+    <a href="{% url 'create_bookinstance'%}">Add new</a>
+    {% if bookinstance_list %}
+        <table>
+            <tr>
+                <th>book</th>
+                <th>imprint</th>
+                <th>due_back</th>
+                <th>borrower</th>
+                <th>status</th>
+                <th></th>
+            </tr>
+            {% for bookinstance in bookinstance_list %}
+            <tr>
+                <td>{{ bookinstance.book}}</td>
+                <td>{{ bookinstance.imprint}}</td>
+                <td>{{ bookinstance.due_back}}</td>
+                <td>{{ bookinstance.borrower}}</td>
+                <td>{{ bookinstance.status}}</td>
+                <td><a href="{% url 'bookinstance_update' bookinstance.id %}">Edit</a></td>                
+                <td><a href="{% url 'bookinstance_delete' bookinstance.id %}">&nbsp; x</a></td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>There are no book instances in the library.</p>
+    {% endif %}
+{% endblock content %}
+
